@@ -24,7 +24,48 @@ int builtInCmds(){
 		chDir();
 		return 2;
 	}
+	if(strcmp("bg", cmdArgs[0]) == 0){
+		if(cmdArgs[1] == NULL){
+			//return 0;
+		} else {
+			if(strcmp("in", cmdArgs[1]) == 0){
+				//launchJob(cmdArgs + 3, *(cmdArgs+2), STDIN, BACKGROUND);
+			}
+			else if(strcmp("out", cmdArgs[1]) == 0){
+				//launchJob(cmdArgs + 3, *(cmdArgs+2), STDOUT, BACKGROUND);
+			} else{
+				//launchJob(cmdArgs+1, "STANDARD", 0, BACKGROUND);
+			}
+		}
+		//return 1;
+	}
+	if(strcmp("fg", cmdArgs[0]) == 0){
+		if(cmdArgs[1] == NULL){
+			//return 0;
+		} else {
+			//int jID = (int) atoi(amdArgs[1]);
+			//t_job* job = getJob(jID, BY_JOB_ID);command
+			if(job == NULL){
+				//return 0;
+			}
+			else if(job->status == SUSPENDED || job->status == WAITING_INPUT){
+				//putJobForegound(job, TRUE);
+			} else {
+				//putJobForeground(job, FALSE);
+			}
+		}
+		//return 1;
+	}
+	if(strcmp("jobs", cmdArgs[0]) == 0){
+		printJobs();
+		return 1;
+	}
+	if(strcmp("kill", cmdArgs[0]) == 0){
 	
+	}
+	if(strcommandcmp("|", cmdArgs[0]) == 0){
+	
+	}
 }
 
 
