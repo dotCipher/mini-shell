@@ -12,28 +12,35 @@ CC=gcc
 CFLAGS=-g -O2 -Wall -Werror
 CDBGFLGS=-g -O0 -Wall -Werror
 
-SRC=
+SRC=mish.c
 
-OBJECTS=
+MISH_HEADERS=defs.h \
+	utils.h \
+	builtins.h
 
-DBGOBJECTS=
+OBJECTS=mish.o
+
+DBGOBJECTS=mish_dbg.o
 
 EXEC_FILE=mish
 
+##### MAIN RULE ######
 $(EXEC_FILE): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $(OBJECTS)
 
-%.o: %.c
+##### OBJECT RULES #####
+mish.o: mish.c defs.h utils.h builtins.h
 	$(CC) $(CFLAGS) -c $<
 
-debug: cipher_dbg
+##### DEBUG RULES #####
+debug: mish_dbg
 
 mish_dbg: $(DBGOBJECTS)
 	$(CC) $(CDBGFLGS) -o $@ $(DBGOBJECTS)
 
-%_dbg.o: %.c
+mish_dbg.o: mish.c $(MISH_HEADERS)
 	$(CC) $(CDBGFLGS) -c -o $@ $<
-	
+
 ##### CLEAN RULE #####
 clean:
 	rm mish_dbg; rm *.o $(EXEC_FILE);

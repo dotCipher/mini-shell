@@ -5,12 +5,21 @@
 #include <string.h>
 #include <errno.h>
 // Local includes
-#include "utils.h"
-#include "utils.h"
+#include "defs.h"
 #include "builtins.h"
+#include "utils.h"
 
 void mChildHandler(int sig){
 	
+}
+
+void handleCmds(){
+	if(builtInCmds() == 1){
+		exit(SUCCESS);
+	}
+	if(builtInCmds() == 0){
+		// launchJob();
+	}
 }
 
 void startShell(){
@@ -38,7 +47,7 @@ void startShell(){
 			printf("Error: Mish is not process group leader\n");
 			exit(ERROR_PGID);
 		}
-		if(tcsetgrp(mTerm, mPGID) == -1){
+		if(tcsetpgrp(mTerm, mPGID) == -1){
 			tcgetattr(mTerm, &mTermios);
 		}
 		curDir = (char*) malloc(sizeof(char)*1024);
@@ -87,13 +96,13 @@ int main(int argc, char *argv[]){
 	// Start Loop for reading input
 	while(TRUE){
 		usrInp = getchar();
-		switch(userInp){
+		switch(usrInp){
 			case '\n':
 				writePrompt();
 				break;
 			default:
 				readInput();
-				handleCommands();
+				handleCmds();
 				writePrompt();
 				break;
 		}
