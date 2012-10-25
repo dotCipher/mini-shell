@@ -1,3 +1,4 @@
+// INCLUDES
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,6 +18,7 @@
 #define ERROR_INTER 2
 #define ERROR_PGID 3
 
+// Runtime vars
 #define BUF_MAX 64
 static char* curDir;
 static char usrInp = '\0';
@@ -26,9 +28,22 @@ static int bufChars = 0;
 static char *cmdArgs[5];
 static int cmdCount = 0;
 
+// Mish process vars
 static pid_t mPID;
 static pid_t mPGID;
 static struct termios mTermios;
 static int mTerm;
 static int mCheck;
 
+// Job control vars
+typedef struct mishJob {
+	char *name;
+	int id;
+	int stat;
+	char *des;
+	pid_t pid;
+	pid_t pgid;
+	struct mishJob *next;
+} t_job;
+static int activeJobs = 0;
+static t_job* jobList = NULL;
