@@ -9,10 +9,6 @@
 #include <fcntl.h>
 #include <termios.h>
 
-// BOOLEAN OPERATORS
-#define TRUE 1
-#define FALSE 0
-
 // ERROR RETURN VALUES
 #define SUCCESS 0
 #define ERROR_INTER 2

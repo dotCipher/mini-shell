@@ -55,17 +55,73 @@ t_job* getJob(int val, int par){
 t_job* delJob(t_job* checkJob){
 	t_job* curJob;
 	t_job* prevJob;
-	if(jobList==NULL){
+	if(jobList == NULL){
 		return NULL;
 	}
-	curJob=jobList->next;
-	prevJob=jobList;
+	curJob = jobList->next;
+	prevJob = jobList;
 	if(prevJob->pid == checkJob->pid){
 		prevJob = prevJob->next;
 		activeJobs--;
 		return curJob;
 	}
-	// HERE
+	while(curJob != NULL){
+		if(curJob->pid == checkJob->pid){
+			activeJobs--;
+			prevJob->next = curJob->next;
+		}
+		prevJob = curJob;
+		curJob = curJob->next;
+	}
+	return jobList;
 }
+
+int updateJobStatus(int jPID, int jSTATUS){
+	int i;
+	t_job *checkJob = jobList;
+	if(checkJob == NULL){
+		return 0;
+	} else {
+		i=0;
+		while(checkJob != NULL){
+			if(checkJob->pid == jPID){
+				checkJob->status = jSTATUS;
+				return 1;
+			}
+			i++;
+			checkJob = checkJob->next;
+		}
+		return 0;
+	}
+}
+
+t_job* addJob(pid_t jPID, pid_t jPGID, char* jNAME, char* jDES, int jSTATUS){
+	t_job *jobToAdd = malloc(sizeof(t_job));
+	jobToAdd->pid = jPID;
+	jobToAdd->pgid = jPGID;
+	jobToAdd->name = (char*)malloc(sizeof(name));
+	jobToAdd->name = strcpy(jobToAdd->name,name);
+	jobToAdd->des = (char*)malloc(sizeof(des));
+	jobToAdd->des = strcpy(jobToAdd->des,des);
+	jobToAdd->next = NULL;
+	if(jobList == NULL){
+		activeJobs++;
+		jobToAdd->id = activeJobs;
+		return jobToAdd;
+	} else {
+		t_job *nextJob = jobList;
+		while(nextJob->next != NULL){
+			nextJob = nextJob->next;
+		}
+		jobToAdd->id = nextJob->id + 1;
+		nextJob->nest = jobToAdd;
+		activeJobs++;
+		return jobList;
+	}
+}
+
+
+
+
 
 
