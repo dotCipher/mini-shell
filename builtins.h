@@ -44,7 +44,7 @@ int builtInCmds(){
 			//return 0;
 		} else {
 			//int jID = (int) atoi(amdArgs[1]);
-			//t_job* job = getJob(jID, BY_JOB_ID);command
+			//mishJob* job = getJob(jID, BY_JOB_ID);command
 			if(job == NULL){
 				//return 0;
 			}

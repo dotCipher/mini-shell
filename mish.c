@@ -11,7 +11,7 @@
 #include "utils.h"
 
 void mChildHandler(int sig){
-	
+	// work on this
 }
 
 void handleCmds(){
@@ -109,7 +109,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	printf("\n");
-	return 0;
+	exit(0);
+	//return 0;
 }
 
 

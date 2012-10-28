@@ -1,5 +1,5 @@
 void showJobs(){
-	t_job* jobs = jobList;
+	mishJob* jobs = jobList;
 	// jobs called for display
 	// pointing to jobsList
 	if(jobs == NULL){
@@ -17,8 +17,11 @@ void showJobs(){
 	}
 }
 
-t_job* getJob(int val, int par){
-	t_job* jobs = jobList;
+// par = 1 == Get by jID
+// par = 2 == Get by pID
+// par = 3 == Get by status
+mishJob* getJob(int val, int par){
+	mishJob* jobs = jobList;
 	if(par==1){
 		// Find by jID
 		while(jobs!=NULL){
@@ -52,9 +55,9 @@ t_job* getJob(int val, int par){
 	}
 }
 
-t_job* delJob(t_job* checkJob){
-	t_job* curJob;
-	t_job* prevJob;
+mishJob* delJob(mishJob* checkJob){
+	mishJob* curJob;
+	mishJob* prevJob;
 	if(jobList == NULL){
 		return NULL;
 	}
@@ -78,7 +81,7 @@ t_job* delJob(t_job* checkJob){
 
 int updateJobStatus(int jPID, int jSTATUS){
 	int i;
-	t_job *checkJob = jobList;
+	mishJob *checkJob = jobList;
 	if(checkJob == NULL){
 		return 0;
 	} else {
@@ -95,21 +98,22 @@ int updateJobStatus(int jPID, int jSTATUS){
 	}
 }
 
-t_job* addJob(pid_t jPID, pid_t jPGID, char* jNAME, char* jDES, int jSTATUS){
-	t_job *jobToAdd = malloc(sizeof(t_job));
+mishJob* addJob(pid_t jPID, pid_t jPGID, char* jNAME, char* jDES, int jSTATUS){
+	mishJob *jobToAdd = malloc(sizeof(mishJob));
 	jobToAdd->pid = jPID;
 	jobToAdd->pgid = jPGID;
 	jobToAdd->name = (char*)malloc(sizeof(name));
 	jobToAdd->name = strcpy(jobToAdd->name,name);
 	jobToAdd->des = (char*)malloc(sizeof(des));
-	jobToAdd->des = strcpy(jobToAdd->des,des);
+	jobToAdd->des = strcpy(jobToAdd->des,des);suspendJob(job);
+		tcsetpgrp(mTerm,mPGID);
 	jobToAdd->next = NULL;
 	if(jobList == NULL){
 		activeJobs++;
 		jobToAdd->id = activeJobs;
 		return jobToAdd;
 	} else {
-		t_job *nextJob = jobList;
+		mishJob *nextJob = jobList;
 		while(nextJob->next != NULL){
 			nextJob = nextJob->next;
 		}
@@ -120,7 +124,48 @@ t_job* addJob(pid_t jPID, pid_t jPGID, char* jNAME, char* jDES, int jSTATUS){
 	}
 }
 
+void killJob(int jID){
+	mishJob *jobCheck = getJob(jID, 1);
+	kill(jobCheck->pid, SIGKILL);
+}
 
+void foregroundJob(mishJob* job, int jobBool){
+	job->status = FG;
+	tcsetpgrp(mTerm, job->pgid);
+	if(jobBool==1){
+		errno=0;
+		if(kill(job->pgid,SIGCONT) < 0)){
+			perror(" kill SIGCONT");
+		}
+	}
+	suspendJob(job);
+	tcsetpgrp(mTerm,mPGID);
+}
+// Make job go into background
+
+
+void startJob(char *cmds[], char *fd. int newfd, int execMode){
+	pid_t pid;
+	pid = fork();
+	if(pid==-1){
+	
+	} else if(pid==0){
+	
+	} else {
+		setpgid(pid,pid);
+		jobList = addJob(pid,pid,*cmds,fd,execMode);	
+		// Check Job by pID
+		mishJob* jobCheck = getJob(pid,2);
+		// execMode = 1 == Foreground
+		// execMode = 2 == Background
+		if(execMode == 1){
+			foregroundJob(jobCheck, 0);
+		}
+		if(execMode == 1){
+			
+		}
+	}
+}
 
 
 

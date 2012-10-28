@@ -11,8 +11,11 @@
 
 // ERROR RETURN VALUES
 #define SUCCESS 0
-#define ERROR_INTER 2
 #define ERROR_PGID 3
+
+// Foreground and Background
+#define FG 1
+#define BG 2
 
 // Runtime vars
 #define BUF_MAX 64
@@ -40,6 +43,6 @@ typedef struct mishJob {
 	pid_t pid;
 	pid_t pgid;
 	struct mishJob *next;
-} t_job;
+} mishJob;
 static int activeJobs = 0;
-static t_job* jobList = NULL;
+static mishJob* jobList = NULL;
