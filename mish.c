@@ -11,7 +11,47 @@
 #include "utils.h"
 
 void mChildHandler(int sig){
-	// work on this
+	// signalHandler_child
+	int tStat;
+	pid_t jPID;
+	jPID = waitpid(-1, &tStat, WUNTRACED | WNOHANG);
+	if(jPID > 0){
+		mishJob jobCheck = getJob(jPID, 2);
+		if(jobCheck == NULL){
+			return;
+		} else {
+			if(WIFEXITED(tStat)){
+				if(jobCheck->stat == BG){
+					printf("\n[%4d] %32s -> Done\n",
+						jobCheck->id, jobCheck->name);
+					jobList = delJob(jobCheck);
+				}
+			} else if(WIFSIGNALED(tStat)){
+				printf("\n[%4d] %32s -> Killed\n",
+					jobCheck->id, jobCheck->name);
+				jobList = delJob(jobCheck);
+			} else if(WIFSTOPPED(tStat)){
+				if(jobCheck->stat == BG){
+					tcsetpgrp(mTerm, mPGID);
+					updateJobStatus(jPID, WI);
+					printf("\n[%4d] %32s -> Suspended\n",
+						jobCheck->id, jobCheck->name);
+				} else {
+					// Job is in foreground
+					tcsetpgrp(mTerm, jobCheck->pgid);
+					updateJobStatus(jPID, SP);
+					printf("\n[%4d] %32s -> Stopped\n",
+						jobCheck->id, jobCheck->name);
+				}
+				return;
+			} else {
+				if(jobCheck->stat == BG){
+					jobList = delJob(jobCheck);
+				}
+			}
+			tcsetpgrp(mTerm, mPGID);
+		}
+	}
 }
 
 void handleCmds(){
@@ -19,7 +59,7 @@ void handleCmds(){
 		exit(SUCCESS);
 	}
 	if(builtInCmds() == 0){
-		// launchJob();
+		startJob(cmdArgs, "STANDARD", 0, FG);
 	}
 }
 

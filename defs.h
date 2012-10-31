@@ -9,13 +9,17 @@
 #include <fcntl.h>
 #include <termios.h>
 
-// ERROR RETURN VALUES
+// PROGRAM RETURN VALUES
 #define SUCCESS 0
+#define ERROR_INTER 1
+#define ERROR_PID 2
 #define ERROR_PGID 3
 
-// Foreground and Background
+// JOB STATUSES
 #define FG 1
 #define BG 2
+#define SP 3
+#define WI 4
 
 // Runtime vars
 #define BUF_MAX 64
