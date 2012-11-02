@@ -23,12 +23,13 @@
 
 // Runtime vars
 #define BUF_MAX 64
+#define MAX_PIPE 1024
 static char* curDir;
 static char usrInp = '\0';
 static char buf[BUF_MAX];
 static int bufChars = 0;
 
-static char *cmdArgs[5];
+static char *cmdArgs[64];
 static int cmdCount = 0;
 
 // Mish process vars

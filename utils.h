@@ -44,6 +44,45 @@ void chDir(){
 	}
 }
 
+void pipeline(int f){
+	int i;
+  char pl[MAX_PIPE];
+  FILE *fp_in, *fp_out;
+  char cmd1[BUF_MAX],cmd2[BUF_MAX];
+  if(f==2){
+  	// strcpy ?
+	  strcat(cmd1,commandArgv[0]);
+	  strcat(cmd2,commandArgv[2]);
+	} /* else {
+		for(i=0; i<f-1; i++){
+			strcat(cmd1,cmdArgs[i]);
+		  strcat(cmd1," ");
+	  }
+	  strcpy(cmd2,cmdArgs[cmdCount-1]);
+	}
+  puts(cmdArgs[0]);
+  puts(cmd1);
+  puts(cmd2);
+  
+  if ((fpin = popen(arg1, "r")) == NULL)
+  	printf("can't open %s", arg1);
+
+    if ((fpout = popen(arg2, "w")) == NULL)
+        printf("popen error");
+
+
+    while (fgets(line, MAXLINE, fpin) != NULL) {
+        if (fputs(line, fpout) == EOF)
+            printf("fputs error to pipe");
+    }
+    if (ferror(fpin))
+        printf("fgets error");
+    if (pclose(fpout) == -1)
+        printf("pclose error\n");
+        */
+}
+
+
 /*
  * 1 = Exit shell
  *
@@ -84,7 +123,7 @@ int builtInCmds(){
 		}
 	}
 	if(strcmp("jobs", cmdArgs[0]) == 0){
-		printJobs();
+		showJobs();
 		return 1;
 	}
 	if(strcmp("kill", cmdArgs[0]) == 0){
@@ -109,8 +148,6 @@ int builtInCmds(){
 	}
 	return 0;
 }
-
-
 
 
 

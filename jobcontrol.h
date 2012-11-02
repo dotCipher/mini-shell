@@ -52,7 +52,6 @@ mishJob* getJob(int val, int par){
 	} else {
 		// Nothing set
 		return NULL;
-		break;
 	}
 }
 
@@ -103,10 +102,10 @@ mishJob* addJob(pid_t jPID, pid_t jPGID, char* jNAME, char* jDES, int jSTATUS){
 	mishJob *jobToAdd = malloc(sizeof(mishJob));
 	jobToAdd->pid = jPID;
 	jobToAdd->pgid = jPGID;
-	jobToAdd->name = (char*)malloc(sizeof(name));
-	jobToAdd->name = strcpy(jobToAdd->name,name);
-	jobToAdd->des = (char*)malloc(sizeof(des));
-	jobToAdd->des = strcpy(jobToAdd->des,des);suspendJob(job);
+	jobToAdd->name = (char*)malloc(sizeof(jNAME));
+	jobToAdd->name = strcpy(jobToAdd->name,jNAME);
+	jobToAdd->des = (char*)malloc(sizeof(jDES));
+	jobToAdd->des = strcpy(jobToAdd->des,jDES);
 	jobToAdd->stat = jSTATUS;
 	jobToAdd->next = NULL;
 	if(jobList == NULL){
@@ -194,10 +193,54 @@ void runCmd(char *cmds[], char *fd, int newfd, int execMode){
 	}
 }
 
+void mChildHandler(int sig){
+	// signalHandler_child
+	int tStat;
+	pid_t jPID;
+	jPID = waitpid(-1, &tStat, WUNTRACED | WNOHANG);
+	if(jPID > 0){
+		mishJob* jobCheck = getJob(jPID, 2);
+		if(jobCheck == NULL){
+			return;
+		} else {
+			if(WIFEXITED(tStat)){
+				if(jobCheck->stat == BG){
+					printf("\n[%4d] %32s -> Done\n",
+						jobCheck->id, jobCheck->name);
+					jobList = delJob(jobCheck);
+				}
+			} else if(WIFSIGNALED(tStat)){
+				printf("\n[%4d] %32s -> Killed\n",
+					jobCheck->id, jobCheck->name);
+				jobList = delJob(jobCheck);
+			} else if(WIFSTOPPED(tStat)){
+				if(jobCheck->stat == BG){
+					tcsetpgrp(mTerm, mPGID);
+					updateJobStatus(jPID, WI);
+					printf("\n[%4d] %32s -> Suspended\n",
+						jobCheck->id, jobCheck->name);
+				} else {
+					// Job is in foreground
+					tcsetpgrp(mTerm, jobCheck->pgid);
+					updateJobStatus(jPID, SP);
+					printf("\n[%4d] %32s -> Stopped\n",
+						jobCheck->id, jobCheck->name);
+				}
+				return;
+			} else {
+				if(jobCheck->stat == BG){
+					jobList = delJob(jobCheck);
+				}
+			}
+			tcsetpgrp(mTerm, mPGID);
+		}
+	}
+}
+
 /*
  * Will have exit states
  */
-void startJob(char *cmds[], char *fd. int newfd, int execMode){
+void startJob(char *cmds[], char *fd, int newfd, int execMode){
 	pid_t pid;
 	pid = fork();
 	if(pid==-1){
