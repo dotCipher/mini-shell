@@ -9,35 +9,28 @@
 #include <fcntl.h>
 #include <termios.h>
 
-// PROGRAM RETURN VALUES
-#define SUCCESS 0
-#define ERROR_INTER 1
-#define ERROR_PID 2
-#define ERROR_PGID 3
-
-// JOB STATUSES
-#define FG 1
-#define BG 2
-#define SP 3
-#define WI 4
+// DEBUG VAR
+int DEBUG = 0;
 
 // Runtime vars
-#define BUF_MAX 64
-#define MAX_PIPE 1024
-static char* curDir;
-static char usrInp = '\0';
-static char buf[BUF_MAX];
-static int bufChars = 0;
+#define BUF_MAX 50
+#define MAX_PIPE 4096
+#define MISHSTDIN 1
+#define MISHSTDOUT 2
+char* curDir;
+char usrInp = '\0';
+char buf[BUF_MAX];
+int bufChars = 0;
 
-static char *cmdArgs[64];
-static int cmdCount = 0;
+char *cmdArgs[BUF_MAX];
+int cmdCount = 0;
 
 // Mish process vars
-static pid_t mPID;
-static pid_t mPGID;
-static struct termios mTermios;
-static int mTerm;
-static int mCheck;
+pid_t mPID;
+pid_t mPGID;
+struct termios mTermios;
+int mTerm;
+int mCheck;
 
 // Job control vars
 typedef struct mishJob {
@@ -49,5 +42,9 @@ typedef struct mishJob {
 	pid_t pgid;
 	struct mishJob *next;
 } mishJob;
-static int activeJobs = 0;
-static mishJob* jobList = NULL;
+int activeJobs = 0;
+mishJob* jobList = NULL;
+
+// Index marker
+int i;
+

@@ -16,7 +16,7 @@ SRC=mish.c
 
 MISH_HEADERS=defs.h \
 	utils.h \
-	builtins.h
+	jobcontrol.h
 
 OBJECTS=mish.o
 
@@ -29,7 +29,7 @@ $(EXEC_FILE): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $(OBJECTS)
 
 ##### OBJECT RULES #####
-mish.o: mish.c defs.h utils.h builtins.h
+mish.o: mish.c $(MISH_HEADERS)
 	$(CC) $(CFLAGS) -c $<
 
 ##### DEBUG RULES #####

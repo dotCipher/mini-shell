@@ -4,61 +4,28 @@
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
+
 // Local includes
 #include "defs.h"
 #include "jobcontrol.h"
 #include "utils.h"
 
-void mChildHandler(int sig){
-	// signalHandler_child
-	int tStat;
-	pid_t jPID;
-	jPID = waitpid(-1, &tStat, WUNTRACED | WNOHANG);
-	if(jPID > 0){
-		mishJob jobCheck = getJob(jPID, 2);
-		if(jobCheck == NULL){
-			return;
-		} else {
-			if(WIFEXITED(tStat)){
-				if(jobCheck->stat == BG){
-					printf("\n[%4d] %32s -> Done\n",
-						jobCheck->id, jobCheck->name);
-					jobList = delJob(jobCheck);
-				}
-			} else if(WIFSIGNALED(tStat)){
-				printf("\n[%4d] %32s -> Killed\n",
-					jobCheck->id, jobCheck->name);
-				jobList = delJob(jobCheck);
-			} else if(WIFSTOPPED(tStat)){
-				if(jobCheck->stat == BG){
-					tcsetpgrp(mTerm, mPGID);
-					updateJobStatus(jPID, WI);
-					printf("\n[%4d] %32s -> Suspended\n",
-						jobCheck->id, jobCheck->name);
-				} else {
-					// Job is in foreground
-					tcsetpgrp(mTerm, jobCheck->pgid);
-					updateJobStatus(jPID, SP);
-					printf("\n[%4d] %32s -> Stopped\n",
-						jobCheck->id, jobCheck->name);
-				}
-				return;
-			} else {
-				if(jobCheck->stat == BG){
-					jobList = delJob(jobCheck);
-				}
-			}
-			tcsetpgrp(mTerm, mPGID);
-		}
-	}
-}
-
 void handleCmds(){
-	if(builtInCmds() == 1){
-		exit(SUCCESS);
+	if(DEBUG == 1){
+		printf("cmdCount = %d\n", cmdCount);
+			for(i=0; i < sizeof(cmdArgs); i++){
+				printf("cmdArgs[%d] = %s\n", i, cmdArgs[i]);
+			}
 	}
-	if(builtInCmds() == 0){
-		startJob(cmdArgs, "STANDARD", 0, FG);
+	if(builtInCmds() == 1){
+		if(DEBUG == 1){
+			printf("Builtin Command found:\n");
+		}
+		startJob(cmdArgs, "STANDARD", 0, 'F');
+	} else {
+		if(DEBUG == 1){
+			printf("Non-Builtin Command found.\n");
+		}
 	}
 }
 
@@ -80,61 +47,32 @@ void startShell(){
 		signal(SIGTSTP, SIG_IGN);
 		// Any child jobs need to be handled
 		signal(SIGCHLD, &mChildHandler);
-		// 
-		//setpgid(mPID, mPID);
+		setpgid(mPID, mPID);
 		mPGID=getpgrp();
 		if(mPID != mPGID){
 			printf("Error: Mish is not process group leader\n");
-			exit(ERROR_PGID);
+			exit(EXIT_FAILURE);
 		}
 		if(tcsetpgrp(mTerm, mPGID) == -1){
 			tcgetattr(mTerm, &mTermios);
 		}
-		curDir = (char*) malloc(sizeof(char)*1024);
+		memset(&curDir, 0, sizeof((char)*1024));
+		curDir = (char*) malloc(sizeof((char)*1024));
 	} else {
 		printf("Error: Mish could not be made interactive.");
-		exit(ERROR_INTER);
+		exit(EXIT_FAILURE);
 	}
 }
 
 /* [-------- Main Method --------]
  */
-int main(int argc, char *argv[]){
-	/*
-	// Start while loop 1
-	while(1){
-		int childPid;
-		char *cmdLine;
-		char *cmd;
-		printPrompt();
-		cmdLine = readCommandLine();
-		cmd = parseCommandLine();
-		// Maybe record command in mish history?
-		if(isBuiltInCommand(cmd)){
-			executeBuiltInCommand(cmd);
-		} else {
-			childPid = fork();
-			if(childPid == 0){
-				// call execvp
-				executeCommand(cmd);
-			} else {
-				if(isBackgroundJob(cmd)){
-					// record in list of background jobs
-				} else {
-					waitpid(childPid);
-				}
-			}
-		}
-	}
-	// End while loop 1
-	*/
-	
+int main(int argc, char **argv, char **envp){
 	// Start up everything
 	startShell();
 	writePrompt();
 	
 	// Start Loop for reading input
-	while(TRUE){
+	while(1){
 		usrInp = getchar();
 		switch(usrInp){
 			case '\n':
@@ -149,7 +87,6 @@ int main(int argc, char *argv[]){
 	}
 	printf("\n");
 	exit(0);
-	//return 0;
 }
 
 
