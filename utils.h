@@ -1,22 +1,3 @@
-void setNullString(char *string){
-	int newlineInt = (int)'\n';
-	if(DEBUG == 1){
-		printf("\nNull Terminating the string:\n");
-	}
-	if((int)string[strlen(string)-1] == (newlineInt)){
-			if(DEBUG == 1){
-				printf("...already null terminated!\n");
-			}
-	}
-	else {
-		if(DEBUG == 1){
-			// FIX THIS
-			printf("string[%d] = %s]\n", (int)strlen(string)-1, string[i]);
-		}
-		string[strlen(string)-1] = newlineInt;
-	}
-}
-
 /*  ------------ Write Prompt ------------ 
  *	Writes the main prompt to the terminal
  *	Returns:
@@ -32,14 +13,20 @@ void writePrompt(){
  *		void
  */
 void parseCmds(){
-	char *p;
+	char *p = "";
 	p = strtok(buf, " ");
-	memset(&cmdArgs,0,sizeof(cmdArgs));
-	
 	while(p != NULL){
 		cmdArgs[cmdCount] = p;
 		p = strtok(NULL, " ");
 		cmdCount++;
+	}
+	if(DEBUG == 1){
+		printf("\nCommands Parsed:\n");
+		printf("cmdCount = %d\n", cmdCount);
+		for(i=0; i < cmdCount-1; i++){
+			printf("cmdArgs[%d] = %s\n", i, cmdArgs[cmdCount]);
+		}
+		printf("Finished printing cmds\n");
 	}
 }
 
@@ -55,7 +42,6 @@ void resetInput(){
 	}
 	bufChars = 0;
 	memset(&buf,0,sizeof(buf));
-	setNullString(buf);
 }
 
 /*  ------------ Read Input ------------ 
@@ -70,7 +56,13 @@ void readInput(){
 		buf[bufChars++] = usrInp;
 		usrInp = getchar();
 	}
-	buf[bufChars] = 0x00;
+	if(DEBUG == 1){
+		printf("\nBuffer:\n");
+		printf("bufChars = %d\n", bufChars);
+		for(i=0; i<bufChars; i++){
+			printf("buf[%d] = %c\n", i, buf[i]);	
+		}
+	}
 	parseCmds();
 }
 
@@ -154,6 +146,9 @@ int builtInCmds(){
 		exit(EXIT_SUCCESS);
 	}
 	if(strcmp("cd", cmdArgs[0]) == 0){
+		if(DEBUG == 1){
+			printf("\nChaning directory\n");
+		}
 		chDir();
 		return 1;
 	}

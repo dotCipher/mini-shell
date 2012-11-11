@@ -11,12 +11,6 @@
 #include "utils.h"
 
 void handleCmds(){
-	if(DEBUG == 1){
-		printf("cmdCount = %d\n", cmdCount);
-			for(i=0; i < sizeof(cmdArgs); i++){
-				printf("cmdArgs[%d] = %s\n", i, cmdArgs[i]);
-			}
-	}
 	if(builtInCmds() == 1){
 		if(DEBUG == 1){
 			printf("Builtin Command found:\n");
@@ -34,6 +28,8 @@ void startShell(){
 	mTerm = STDIN_FILENO;
 	mCheck = isatty(mTerm);
 	mPID = getpid();
+	activeJobs = 0;
+	jobList = NULL;
 	// Is the terminal interactive now?
 	if(mCheck==1){
 		while(tcgetpgrp(mTerm) != (mPGID=getpgrp())){
@@ -56,8 +52,7 @@ void startShell(){
 		if(tcsetpgrp(mTerm, mPGID) == -1){
 			tcgetattr(mTerm, &mTermios);
 		}
-		memset(&curDir, 0, sizeof((char)*1024));
-		curDir = (char*) malloc(sizeof((char)*1024));
+		curDir = (char*) calloc(1024, sizeof(char));
 	} else {
 		printf("Error: Mish could not be made interactive.");
 		exit(EXIT_FAILURE);
@@ -66,7 +61,7 @@ void startShell(){
 
 /* [-------- Main Method --------]
  */
-int main(int argc, char **argv, char **envp){
+int main(int argc, char *argv[], char **envp){
 	// Start up everything
 	startShell();
 	writePrompt();

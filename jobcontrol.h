@@ -76,21 +76,20 @@ mishJob* getJob(int val, int par){
  *		of a mishJob* is the current 
  *		mishJob after the deleted mishJob
  *  Returns:
- *		mishJob* = SUCCESS
- *		NULL = FAILURE
+ *		void
  */
-mishJob* delJob(mishJob* checkJob){
+void delJob(mishJob* checkJob){
 	mishJob* curJob;
 	mishJob* prevJob;
 	if(jobList == NULL){
-		return NULL;
+		return;
 	}
 	curJob = jobList->next;
 	prevJob = jobList;
 	if(prevJob->pid == checkJob->pid){
 		prevJob = prevJob->next;
 		activeJobs--;
-		return curJob;
+		return;
 	}
 	while(curJob != NULL){
 		if(curJob->pid == checkJob->pid){
@@ -100,7 +99,7 @@ mishJob* delJob(mishJob* checkJob){
 		prevJob = curJob;
 		curJob = curJob->next;
 	}
-	return jobList;
+	return;
 }
 
 /*  ------------ Update Job Status ------------ 
@@ -146,21 +145,28 @@ mishJob* addJob(pid_t jPID, pid_t jPGID, char* jNAME, char* jDES, int jSTATUS){
 		printf("DESCRIPTOR = %s\n", jDES);
 		printf("STATUS = %d\n", jSTATUS);
 	}
+	jobList[activeJobs] = malloc(sizeof(mishJob));
+	jobList[activeJobs]->pid = jPID;
+	jobList[activeJobs]->pgid = jPGID;
+	jobList[activeJobs]->name = (char*)malloc(sizeof(jNAME));
+	strcpy(jobList[activeJobs]->name,jNAME);
+	jobList[activeJobs]->des = (char*)malloc(sizeof(jDES)));
+	strcpy(jobList[activeJobs]->des,jDES);
+	
+	
 	mishJob *jobToAdd = malloc(sizeof(mishJob));
 	jobToAdd->pid = jPID;
 	jobToAdd->pgid = jPGID;
 	jobToAdd->name = (char*)malloc(sizeof(jNAME));
-	memset(&jobToAdd->name,0,sizeof(jNAME));
 	strcpy(jobToAdd->name,jNAME);
 	jobToAdd->des = (char*)malloc(sizeof(jDES));
-	memset(&jobToAdd->des,0,sizeof(jDES));
 	strcpy(jobToAdd->des,jDES);
 	jobToAdd->stat = jSTATUS;
 	jobToAdd->next = NULL;
 	if(jobList == NULL){
 		activeJobs++;
 		jobToAdd->id = activeJobs;
-		return jobToAdd;
+		return jobList;
 	} else {
 		mishJob *prevJob = jobList;
 		while(prevJob->next != NULL){
@@ -277,7 +283,7 @@ void runCmd(char *cmds[], char *fd, int newfd, int execMode){
 void mChildHandler(int sig){
 	int tStat;
 	pid_t jPID;
-	jPID = waitpid(-1, &tStat, WUNTRACED | WNOHANG);
+	jPID = waitpid(WAIT_ANY, &tStat, WUNTRACED | WNOHANG);
 	if(jPID > 0){
 		mishJob* jobCheck = getJob(jPID, 2);
 		if(jobCheck == NULL){
@@ -287,7 +293,7 @@ void mChildHandler(int sig){
 				if(jobCheck->stat == 'B'){
 					printf("\n[%4d] %32s -> Done\n",
 						jobCheck->id, jobCheck->name);
-					jobList = delJob(jobCheck);
+					delJob(jobCheck);
 				}
 			} else if(WIFSIGNALED(tStat)){
 				printf("\n[%4d] %32s -> Killed\n",
@@ -309,7 +315,7 @@ void mChildHandler(int sig){
 				return;
 			} else {
 				if(jobCheck->stat == 'B'){
-					jobList = delJob(jobCheck);
+					delJob(jobCheck);
 				}
 			}
 			tcsetpgrp(mTerm, mPGID);
@@ -331,6 +337,15 @@ void mChildHandler(int sig){
 void startJob(char *cmds[], char *fd, int newfd, int execMode){
 	pid_t pid;
 	pid = fork();
+	if(DEBUG == 1){
+		printf("\nAdding Job:\n");
+		printf("pid = %d\n", pid);
+		for(i=0; i<sizeof(cmds); i++){
+			printf("cmds[%d] = %s\n", i, cmds[i]);
+		}
+		printf("fd = %s\n", fd);
+		printf("execMode = %c\n", execMode);
+	}
 	if(pid==-1){
 		perror("Error starting job ");
 		exit(2);
@@ -353,15 +368,6 @@ void startJob(char *cmds[], char *fd, int newfd, int execMode){
 		}
 	} else {
 		setpgid(pid,pid);
-		if(DEBUG == 1){
-			printf("\nAdding Job:\n");
-			printf("pid = %d\n", pid);
-			for(i=0; i<sizeof(cmds); i++){
-				printf("cmds[%d] = %s\n", i, cmds[i]);
-			}
-			printf("fd = %s\n", fd);
-			printf("execMode = %c\n", execMode);
-		}
 		// Add to job list
 		jobList = addJob(pid,pid,*(cmds),fd,(int)execMode);	
 		// Check Job by pID

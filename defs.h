@@ -15,6 +15,7 @@ int DEBUG = 0;
 // Runtime vars
 #define BUF_MAX 50
 #define MAX_PIPE 4096
+#define MAX_JOBS 100
 #define MISHSTDIN 1
 #define MISHSTDOUT 2
 char* curDir;
@@ -38,12 +39,12 @@ typedef struct mishJob {
 	int id;
 	int stat;
 	char *des;
-	pid_t pid;
-	pid_t pgid;
-	struct mishJob *next;
+	int pid;
+	int pgid;
+	mishJob *next;
 } mishJob;
-int activeJobs = 0;
-mishJob* jobList = NULL;
+int activeJobs;
+mishJob* jobList;
 
 // Index marker
 int i;

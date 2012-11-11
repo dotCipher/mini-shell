@@ -26,7 +26,8 @@ EXEC_FILE=mish
 
 ##### MAIN RULE ######
 $(EXEC_FILE): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(OBJECTS); \
+	rm *.o;
 
 ##### OBJECT RULES #####
 mish.o: mish.c $(MISH_HEADERS)
